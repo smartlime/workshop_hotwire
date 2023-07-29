@@ -17,3 +17,7 @@
 .artist-meta {
   @apply mt-2;
 }
+
+.artist--section-link {
+  @apply icon-btn text-small float-right;
+}

@@ -14,18 +14,22 @@
         <% end %>
       <% end %>
     <%- end -%>
-    <%= form_with(url: search_path, method: :get, class: "nav--search") do |f| %>
-      <div class="nav--search--icon">
-        <%= render "icons/search" %>
-      </div>
-      <%= f.search_field :q, value: params[:q], class: "nav--search--input" %>
-    <% end %>
+    <div data-controller="search">
+      <%= form_with(url: search_path, method: :get, class: "nav--search", data: {search_target: "form"}) do |f| %>
+        <div class="nav--search--icon">
+          <%= render "icons/search" %>
+        </div>
+        <%= f.search_field :q, value: params[:q], class: "nav--search--input",
+                           data: {action: "keyup->search#fetch focus->search#focus", search_target: "term"} %>
+      <% end %>
+      <%= turbo_frame_tag "search-results", data: {search_target: "results"}, target: "_top" %>
+    </div>
   </div>
   <div class="nav--right">
     <%- if current_user -%>
       <span class="nav--username"><%= User::PREFIX + current_user.username %></span>
       <%= button_to "Sign out", sign_out_path, method: :delete, class: "nav--btn--outlined ml-2" %>
-    <%- else- %>
+    <%- else -%>
       <%= link_to "Sign up", sign_up_path, class: "nav--btn--outlined" %>
       <%= link_to "Log in", sign_in_path, class: "nav--btn ml-2" %>
     <%- end -%>

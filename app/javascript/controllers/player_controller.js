@@ -14,7 +14,7 @@ function secondsToDuration(num) {
 export default class extends Controller {
   static targets = ["progress", "time"];
   static outlets = ["track"];
-  static values = { duration: Number, track: String, nextTrackUrl: String };
+  static values = { duration: Number, track: String, nextTrackUrl: String, state: String, pauseUrl: String , resumeUrl: String };
   static classes = ["playing"];
 
   initialize() {
@@ -36,6 +36,18 @@ export default class extends Controller {
     }
   }
 
+  stateValueChanged() {
+    if (this.pauseUrlValue) {
+      return;
+    }
+
+    if (this.playing && this.stateValue === "paused") {
+      this.pause(false);
+    } else if (!this.playing && this.stateValue === "playing") {
+      this.play(false);
+    }
+  }
+
   trackOutletConnected(outlet, el) {
     outlet.togglePlayingIfMatch(this.trackValue);
   }
@@ -46,7 +58,7 @@ export default class extends Controller {
       this.setupAudioListeners();
     }
 
-    if (this.playing) {
+    if (this.playing || this.stateValue === "playing") {
       this.play();
     }
   }
@@ -61,12 +73,16 @@ export default class extends Controller {
     this.element.classList.add(this.playingClass);
     this.audio.play();
     this.playing = true;
+
+    if (this.resumeUrlValue) this.broadcastStateChange(this.resumeUrlValue);
   }
 
   pause() {
     this.element.classList.remove(this.playingClass);
     this.audio.pause();
     this.playing = false;
+
+    if (this.pauseUrlValue) this.broadcastStateChange(this.pauseUrlValue);
   }
 
   seek(e) {
@@ -96,6 +112,16 @@ export default class extends Controller {
     const response = await request.perform();
     if (!response.ok) {
       console.error("Failed to load next track", response.status);
+    }
+  }
+
+  async broadcastStateChange(url) {
+    const request = new FetchRequest("POST", url, {
+      responseKind: "turbo-stream",
+    });
+    const response = await request.perform();
+    if (!response.ok) {
+      console.error("Failed to broadcast pause/resume", response.status);
     }
   }
 

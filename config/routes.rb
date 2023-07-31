@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     patch :start, on: :member
     patch :stop, on: :member
     post :play_next, on: :member
+    post :pause, on: :member
+    post :resume, on: :member
 
     resources :tracks, only: [:create, :destroy], module: :live_station do
       post :play, on: :member

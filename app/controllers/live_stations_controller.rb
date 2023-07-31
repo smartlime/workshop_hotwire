@@ -79,6 +79,19 @@ class LiveStationsController < ApplicationController
     render turbo_stream: turbo_stream.update("player", partial: "player/player", locals: {station:, track: station.current_track})
   end
 
+  def pause
+    station = current_user.live_station
+    station.update!(live: false)
+    Turbo::StreamsChannel.broadcast_stream_to station, content: turbo_stream.set_attribute(".player", "data-player-state-value", "paused")
+  end
+
+
+  def resume
+    station = current_user.live_station
+    station.update!(live: true)
+    Turbo::StreamsChannel.broadcast_stream_to station, content: turbo_stream.set_attribute(".player", "data-player-state-value", "playing")
+  end
+
   private
 
   def station_params

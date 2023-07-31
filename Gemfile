@@ -67,3 +67,5 @@ gem "bcrypt", "~> 3.1.7"
 group :development do
   eval_gemfile "gemfiles/rubocop.gemfile"
 end
+
+gem "turbo_power", "~> 0.3.1"

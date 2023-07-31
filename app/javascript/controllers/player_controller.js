@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 import FakeAudio from "fake_audio";
 import { FetchRequest } from "@rails/request.js";
+import consumer from "../channels/consumer"
 
 function secondsToDuration(num) {
   let mins = Math.floor(num / 60);
@@ -12,9 +13,9 @@ function secondsToDuration(num) {
 
 // Connects to data-controller="player"
 export default class extends Controller {
-  static targets = ["progress", "time"];
+  static targets = ["progress", "time", "listeners"];
   static outlets = ["track"];
-  static values = { duration: Number, track: String, nextTrackUrl: String };
+  static values = { duration: Number, track: String, nextTrackUrl: String, station: Number };
   static classes = ["playing"];
 
   initialize() {
@@ -49,6 +50,22 @@ export default class extends Controller {
     if (this.playing) {
       this.play();
     }
+
+    if (this.hasStationValue) {
+      this.subscribeListenersCount();
+    }
+  }
+
+  subscribeListenersCount() {
+    this.channel = consumer.subscriptions.create(
+      { channel: "ListenerChannel", station: 1 },
+      { station: this.stationValue,
+        received: (data) => {
+          if (this.hasListenersTarget) {
+            this.listenersTarget.textContent = data.listeners;
+          }
+        }
+    });
   }
 
   disconnect() {

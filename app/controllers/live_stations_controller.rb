@@ -43,6 +43,7 @@ class LiveStationsController < ApplicationController
     station = current_user.live_station
 
     station.update!(live: false)
+    station.reset_listeners_count
 
     Turbo::StreamsChannel.broadcast_update_to station, target: :player, content: ""
 

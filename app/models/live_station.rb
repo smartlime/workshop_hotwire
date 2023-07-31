@@ -35,4 +35,22 @@ class LiveStation < ApplicationRecord
   end
 
   def current_track = tracks.first
+
+  def reset_listeners_count()
+    litecache.set(cache_key, 0)
+  end
+
+  def change_listeners_count_by(delta)
+    listeners =  current_listeners_count + delta
+    listeners = 0 if listeners.negative?
+    litecache.set(cache_key, listeners)
+  end
+
+  def current_listeners_count
+    litecache.get(cache_key).to_i
+  end
+
+  def litecache
+    @_litecache ||= Litecache.new
+  end
 end
